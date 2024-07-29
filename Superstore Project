@@ -1,0 +1,15 @@
+SELECT * 
+FROM superstore
+ORDER BY (price) DESC;
+
+SELECT SUM(price)
+FROM superstore;
+
+SELECT SUM(price)
+FROM superstore
+WHERE category='Kitchen Supplies';
+
+SELECT * FROM superstore
+WHERE price>50
+ORDER BY stock_quantity DESC
+LIMIT 5;
