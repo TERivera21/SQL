@@ -1,0 +1,80 @@
+**Schema (SQLite v3.39)**
+
+    CREATE TABLE marathon (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+       participant_name TEXT,
+       previous_experience TEXT,
+       completion_fraction REAL);
+    
+    INSERT INTO marathon (participant_name, previous_experience,  completion_fraction)
+        VALUES ("Sadie Hawkins", "yes", 1);
+    INSERT INTO marathon (participant_name, previous_experience,  completion_fraction)
+        VALUES ("Brandon Flowers", "no", 0.241);
+    INSERT INTO marathon (participant_name, previous_experience,  completion_fraction)
+        VALUES ("Michael Scott", "no", 0.804);
+    INSERT INTO marathon (participant_name, previous_experience,  completion_fraction)
+        VALUES ("Karamo Brown", "yes", 0.9512);
+    INSERT INTO marathon (participant_name, previous_experience,  completion_fraction)
+        VALUES ("Antoni Porowski", "yes", 0.640);
+    INSERT INTO marathon (participant_name, previous_experience,  completion_fraction)
+        VALUES ("Rajnighanda Kapoor", "no", 1);
+
+---
+
+**Query #1**
+
+    SELECT participant_name,
+    completion_fraction*100 AS completion_percent
+    FROM marathon;
+
+| participant_name   | completion_percent |
+| ------------------ | ------------------ |
+| Sadie Hawkins      | 100                |
+| Brandon Flowers    | 24.099999999999998 |
+| Michael Scott      | 80.4               |
+| Karamo Brown       | 95.12              |
+| Antoni Porowski    | 64                 |
+| Rajnighanda Kapoor | 100                |
+
+---
+**Query #2**
+
+    
+    
+    --rounded example
+    SELECT participant_name,
+    ROUND (completion_fraction*100, 1) AS completion_percent
+    FROM marathon;
+
+| participant_name   | completion_percent |
+| ------------------ | ------------------ |
+| Sadie Hawkins      | 100                |
+| Brandon Flowers    | 24.1               |
+| Michael Scott      | 80.4               |
+| Karamo Brown       | 95.1               |
+| Antoni Porowski    | 64                 |
+| Rajnighanda Kapoor | 100                |
+
+---
+**Query #3**
+
+    
+    
+    SELECT COUNT(*),
+    CASE WHEN completion_fraction>=.75 THEN "75%+"
+    WHEN completion_fraction>=.50 THEN "50%+"
+    WHEN completion_fraction>+.25 THEN "25%+"
+    ELSE "Under 25%" 
+    END AS "quarter_completed"
+    FROM marathon
+    GROUP BY quarter_completed
+
+| COUNT(*) | quarter_completed |
+| -------- | ----------------- |
+| 1        | 50%+              |
+| 4        | 75%+              |
+| 1        | Under 25%         |
+
+---
+
+[View on DB Fiddle](https://www.db-fiddle.com/f/3MJttDcYhwMYWStSs6h722/0)
