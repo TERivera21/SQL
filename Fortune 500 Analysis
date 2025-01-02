@@ -1,0 +1,177 @@
+**Schema (SQLite v3.39)**
+
+    CREATE TABLE fortune_companies (
+        company_id INTEGER PRIMARY KEY,
+        company_name TEXT,
+        industry TEXT,
+        revenue REAL,
+        employees INTEGER,
+        healthcare_benefits BIT,
+        paid_time_off_days INTEGER,
+        maternity_leave_weeks INTEGER,
+        avg_employee_tenure REAL
+    );
+    
+    INSERT INTO fortune_companies (company_name, industry, revenue, employees, healthcare_benefits, paid_time_off_days, maternity_leave_weeks, avg_employee_tenure)
+    VALUES
+        ('Apple Inc.', 'Technology', 365.7, 147000, 1, 20, 12, 4.5),
+        ('Walmart Inc.', 'Retail', 523.96, 2200000, 1, 15, 8, 6.2),
+        ('Exxon Mobil Corporation', 'Energy', 265.01, 72000, 0, 18, 6, 7.8),
+        ('Amazon.com Inc.', 'Technology', 386.06, 1370000, 1, 22, 14, 5.1),
+        ('JPMorgan Chase & Co.', 'Financials', 160.1, 255998, 1, 21, 12, 6.9),
+        ('Verizon Communications Inc.', 'Telecommunications', 131.88, 132600, 0, 15, 6, 5.5),
+        ('Company A', 'Retail', 235.4, 2000, 1, 18, 10, 5.8),
+        ('Company B', 'Healthcare', 400.7, 2300, 1, 22, 13, 5.7),
+        ('Company C', 'Manufacturing', 300.2, 2000, 1, 18, 10, 5.8),
+        ('Company D', 'Healthcare', 150.5, 3500, 1, 20, 12, 6.5),
+        ('Company E', 'Finance', 280.7, 1800, 0, 14, 8, 4.2),
+        ('Company F', 'Technology', 420.1, 2500, 1, 22, 14, 7.1),
+        ('Company G', 'Retail', 190.8, 1500, 1, 16, 9, 5.3),
+        ('Company H', 'Energy', 280.5, 2200, 0, 15, 8, 6.8),
+        ('Company I', 'Telecommunications', 110.3, 1800, 1, 19, 11, 4.9),
+        ('Company J', 'Manufacturing', 390.6, 2700, 1, 21, 13, 6.2),
+        ('Company K', 'Healthcare', 180.2, 3200, 1, 17, 9, 7.4),
+        ('Company L', 'Finance', 230.4, 1900, 0, 13, 7, 5.6),
+        ('Company M', 'Technology', 340.9, 2800, 1, 23, 15, 6.9),
+        ('Company N', 'Retail', 200.6, 1600, 1, 15, 8, 4.7),
+        ('Company O', 'Energy', 260.2, 2400, 0, 14, 7, 6.1),
+        ('Company P', 'Telecommunications', 130.5, 2100, 1, 20, 12, 5.3),
+        ('Company Q', 'Manufacturing', 360.0, 2900, 1, 22, 14, 7.8),
+        ('Company R', 'Technology', 400.7, 2300, 1, 22, 13, 5.7),
+        ('Company S', 'Retail', 210.8, 1600, 0, 16, 9, 4.9),
+        ('Company T', 'Energy', 290.5, 2200, 1, 15, 8, 7.2),
+        ('Company U', 'Telecommunications', 140.3, 1900, 1, 20, 12, 6.1),
+        ('Company V', 'Manufacturing', 350.6, 2800, 1, 22, 14, 5.4),
+        ('Company W', 'Healthcare', 160.2, 3300, 0, 18, 10, 4.8),
+        ('Company X', 'Finance', 240.4, 2000, 1, 13, 7, 7.1),
+        ('Company Y', 'Technology', 320.9, 2700, 1, 23, 15, 5.6),
+        ('Company Z', 'Retail', 180.6, 1400, 0, 14, 8, 6.3),
+        ('Company AA', 'Energy', 240.2, 2600, 1, 17, 9, 6.5),
+        ('Company BB', 'Telecommunications', 120.5, 2100, 0, 19, 11, 4.5),
+        ('Company CC', 'Manufacturing', 380.0, 3000, 1, 21, 13, 7.3),
+        ('Company DD', 'Healthcare', 170.2, 3200, 1, 17, 9, 5.8),
+        ('Company EE', 'Finance', 250.4, 1900, 0, 12, 6, 6.4),
+        ('Company FF', 'Technology', 300.9, 2500, 1, 24, 16, 6.9),
+        ('Company GG', 'Retail', 190.6, 1700, 0, 13, 7, 5.2),
+        ('Company HH', 'Energy', 280.2, 2300, 1, 16, 9, 6.8),
+        ('Company II', 'Telecommunications', 110.5, 2000, 1, 21, 12, 4.9),
+        ('Company JJ', 'Manufacturing', 370.0, 3100, 1, 20, 12, 7.6),
+        ('Company KK', 'Healthcare', 150.2, 3400, 0, 16, 8, 5.3);
+
+---
+
+**Query #1**
+
+    -- Determine the top 5 companies based on employee count as "large company", "mid-size company", and "small company" in order of average of employee tenure.
+    SELECT company_name, industry, employees, avg_employee_tenure,
+    CASE WHEN employees>=50000 THEN "Large Company"
+    WHEN employees>=3000 THEN "Mid-Size Company"
+    ELSE "Small Company" 
+    END AS Company_Size
+    FROM fortune_companies
+    WHERE healthcare_benefits=1
+    ORDER BY avg_employee_tenure desc
+    LIMIT 5;
+
+| company_name | industry      | employees | avg_employee_tenure | Company_Size     |
+| ------------ | ------------- | --------- | ------------------- | ---------------- |
+| Company Q    | Manufacturing | 2900      | 7.8                 | Small Company    |
+| Company JJ   | Manufacturing | 3100      | 7.6                 | Mid-Size Company |
+| Company K    | Healthcare    | 3200      | 7.4                 | Mid-Size Company |
+| Company CC   | Manufacturing | 3000      | 7.3                 | Mid-Size Company |
+| Company T    | Energy        | 2200      | 7.2                 | Small Company    |
+
+---
+**Query #2**
+
+    
+    
+    -- Determine the top 5 companies in the Finance industry as "mom-friendly", "acceptable", or "does not meet requirements" based on the maternity leave offered. 
+    SELECT company_name,
+    CASE
+    	WHEN maternity_leave_weeks>=12 THEN "mom-friendly"
+        WHEN maternity_leave_weeks>=8 THEN "acceptable"
+    ELSE "Does Not Meet Requirements"
+    END AS 'Mom-Friendly Workplace'
+    FROM fortune_companies
+    WHERE industry='Finance'
+    Limit 5;
+
+| company_name | Mom-Friendly Workplace     |
+| ------------ | -------------------------- |
+| Company E    | acceptable                 |
+| Company L    | Does Not Meet Requirements |
+| Company X    | Does Not Meet Requirements |
+| Company EE   | Does Not Meet Requirements |
+
+---
+**Query #3**
+
+    
+    
+    --Display the top 5 companies that have more than 5 PTO days and healthcare benefits
+    SELECT company_name, paid_time_off_days
+    FROM fortune_companies
+    WHERE healthcare_benefits=1
+    AND paid_time_off_days>20
+    ORDER BY paid_time_off_days desc
+    LIMIT 5;
+
+| company_name    | paid_time_off_days |
+| --------------- | ------------------ |
+| Company FF      | 24                 |
+| Company M       | 23                 |
+| Company Y       | 23                 |
+| Amazon.com Inc. | 22                 |
+| Company B       | 22                 |
+
+---
+**Query #4**
+
+    
+    
+    --Determine average revenue by industry
+    SELECT company_name, industry, ROUND(AVG(revenue),3) AS average_revenue
+    FROM fortune_companies
+    GROUP BY industry
+    HAVING average_revenue>200;
+
+| company_name            | industry      | average_revenue |
+| ----------------------- | ------------- | --------------- |
+| Exxon Mobil Corporation | Energy        | 269.435         |
+| Company E               | Finance       | 250.475         |
+| Company B               | Healthcare    | 202             |
+| Company C               | Manufacturing | 358.567         |
+| Walmart Inc.            | Retail        | 247.537         |
+| Apple Inc.              | Technology    | 362.18          |
+
+---
+**Query #5**
+
+    
+    
+    -- Determine which companies do not provide healthcare benefits and in order of PTO days from the most to the least. 
+    SELECT company_name,industry,paid_time_off_days
+    FROM fortune_companies
+    WHERE healthcare_benefits=0
+    ORDER BY paid_time_off_days desc;
+
+| company_name                | industry           | paid_time_off_days |
+| --------------------------- | ------------------ | ------------------ |
+| Company BB                  | Telecommunications | 19                 |
+| Exxon Mobil Corporation     | Energy             | 18                 |
+| Company W                   | Healthcare         | 18                 |
+| Company S                   | Retail             | 16                 |
+| Company KK                  | Healthcare         | 16                 |
+| Verizon Communications Inc. | Telecommunications | 15                 |
+| Company H                   | Energy             | 15                 |
+| Company E                   | Finance            | 14                 |
+| Company O                   | Energy             | 14                 |
+| Company Z                   | Retail             | 14                 |
+| Company L                   | Finance            | 13                 |
+| Company GG                  | Retail             | 13                 |
+| Company EE                  | Finance            | 12                 |
+
+---
+
+[View on DB Fiddle](https://www.db-fiddle.com/f/saxdDCCyos6z6UdpjeEXSJ/0)
