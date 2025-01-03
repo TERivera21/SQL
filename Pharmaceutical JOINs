@@ -1,0 +1,126 @@
+**Schema (SQLite v3.46)**
+
+    -- Create the 'prescriptions' table
+    CREATE TABLE prescriptions (
+        person_ID INTEGER,
+        geo TEXT,
+        doctor_name TEXT,
+        date_filled DATE,
+        active TEXT
+    );
+    
+    -- Create the 'medication' table
+    CREATE TABLE medication (
+        person_ID INTEGER,
+        medication_name TEXT,
+        prescription_id INTEGER
+    );
+    
+    -- Insert data into the 'prescriptions' table
+    INSERT INTO prescriptions (person_ID, geo, doctor_name, date_filled, active)
+    VALUES
+        (1, '90210', 'Dr. Smith', '2024-01-10', 'Y'),
+        (2, '30301', 'Dr. Johnson', '2022-11-25', 'N'),
+        (3, '10001', 'Dr. Davis', '2023-02-05', 'Y'),
+        (4, '60601', 'Dr. Patel', '2022-12-15', 'Y'),
+        (5, '75201', 'Dr. Garcia', '2023-01-30', 'Y'),
+        (6, '90210', 'Dr. Smith', '2023-04-15', 'Y'),
+        (7, '30301', 'Dr. Johnson', '2023-04-16', 'Y'),
+        (8, '10001', 'Dr. Davis', '2023-04-17', 'Y'),
+        (9, '60601', 'Dr. Patel', '2023-04-18', 'Y'),
+        (10, '75201', 'Dr. Garcia', '2023-04-19', 'Y'),
+        (11, '90210', 'Dr. Smith', '2023-04-20', 'Y'),
+        (12, '30301', 'Dr. Johnson', '2023-04-21', 'Y'),
+        (13, '10001', 'Dr. Davis', '2023-04-22', 'N'),
+        (14, '60601', 'Dr. Patel', '2023-04-23', 'Y'),
+        (15, '75201', 'Dr. Garcia', '2023-04-24', 'Y'),
+        (16, '90210', 'Dr. Smith', '2023-04-25', 'N'),
+        (17, '30301', 'Dr. Johnson', '2023-04-26', 'Y'),
+        (18, '10001', 'Dr. Davis', '2023-04-27', 'Y'),
+        (19, '60601', 'Dr. Patel', '2023-04-28', 'N'),
+        (20, '75201', 'Dr. Garcia', '2023-04-29', 'Y'),
+        (21, '90210', 'Dr. Smith', '2023-04-30', 'N'),
+        (22, '30301', 'Dr. Johnson', '2023-05-01', 'Y'),
+        (23, '10001', 'Dr. Davis', '2023-05-02', 'Y'),
+        (24, '60601', 'Dr. Patel', '2024-01-24', 'Y'),
+        (25, '75201', 'Dr. Garcia', '2023-05-04', 'Y');
+    
+    -- Insert data into the 'medication' table
+    INSERT INTO medication (person_ID, medication_name, prescription_id)
+    VALUES
+        (1, 'Teamocil', 12345678),
+        (2, 'Peppy Bismilk', 23456789),
+        (3, 'Xanatab', 34567890),
+        (4, 'Zonkify', 45678901),
+        (5, 'Floopoxetine', 56789012),
+        (6, 'Teamocil', 43890775),
+        (7, 'Glumara', 78901234),
+        (8, 'Xanatab', 89012345),
+        (9, 'Zonkify', 90123456),
+        (10, 'Floopoxetine', 31346578),
+        (11, 'Zonkify', 46456798),
+        (12, 'Xanatab', 67567809),
+        (13, 'Teamocil', 54678911),
+        (14, 'Peppy Bismilk', 21789021),
+        (15, 'Zonkify', 76890132),
+        (16, 'Peppy Bismilk', 26901234),
+        (17, 'Floopoxetine', 84212345),
+        (18, 'Floopoxetine', 36323456),
+        (19, 'Floopoxetine', 23345678),
+        (20, 'Xanatab', 63896789),
+        (21, 'Zonkify', 25237890),
+        (22, 'Peppy Bismilk', 14678901),
+        (23, 'Zonkify', 85789012),
+        (24, 'Teamocil', 42890123),
+        (25, 'Glumara', 13901234);
+    
+    
+    -- © Copyright 2025 Break Into Tech  --
+    
+
+---
+
+**Query #1**
+
+    -- Prompt: Which medications has Dr. Garcia prescribed?  Your results should include Dr. Garcia's name in one column and the different medication names they've prescribed in the other. 
+    SELECT distinct
+    med.medication_name,
+    scripts.doctor_name
+    FROM medication med
+    INNER JOIN prescriptions scripts
+    ON med.person_ID=scripts.person_ID
+    WHERE scripts.doctor_name = 'Dr. Garcia'
+    ;
+
+| medication_name | doctor_name |
+| --------------- | ----------- |
+| Floopoxetine    | Dr. Garcia  |
+| Zonkify         | Dr. Garcia  |
+| Xanatab         | Dr. Garcia  |
+| Glumara         | Dr. Garcia  |
+
+---
+**Query #2**
+
+    
+    
+    -- Prompt: Zonkify is no longer on the market. When were all the Zonkify prescriptions last filled? 
+    SELECT medication_name,date_filled
+    FROM medication med
+    INNER JOIN prescriptions scripts
+    ON med.person_ID=scripts.person_ID
+    WHERE med.medication_name='Zonkify'
+    ;
+
+| medication_name | date_filled |
+| --------------- | ----------- |
+| Zonkify         | 2022-12-15  |
+| Zonkify         | 2023-04-18  |
+| Zonkify         | 2023-04-20  |
+| Zonkify         | 2023-04-24  |
+| Zonkify         | 2023-04-30  |
+| Zonkify         | 2023-05-02  |
+
+---
+
+[View on DB Fiddle](https://www.db-fiddle.com/f/dm9BnpSRSkY9EoQ1GYrxR9/43)
