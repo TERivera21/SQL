@@ -1,0 +1,256 @@
+-- Prompt for this example:
+You've been asked by your boss to determine which books by which authors are currently being used in the company's Psychology and Economics curricula. You've already done this for psychology, so economics is next.
+
+We're going to work on finding this answer in 3 parts:
+
+Find the names of the economics courses that are currently being taught.
+Find the titles of the textbooks currently used in the economics courses.
+Find the names of the authors who wrote the textbooks .
+
+**Schema (SQLite v3.39)**
+
+    -- A database custom built by Charlotte Chaze <3 
+    -- Many teachers are leaving their jobs and getting hired as data analysts at EdTech companies. This database contains information that an EdTech company like McGraw-Hill would have. 
+    -- This example data is fabricated for demonstration purposes.
+    
+    CREATE TABLE Courses (
+        CourseID INTEGER PRIMARY KEY,
+        CourseName TEXT,
+        Subject TEXT,
+        GradeLevel TEXT,
+    	Current TEXT);
+    
+    CREATE TABLE Textbooks (
+        TextbookID INTEGER PRIMARY KEY,
+        Title TEXT,
+        PublicationYear INTEGER,
+        CourseID INTEGER);
+    
+    CREATE TABLE Author (
+        AuthorID INTEGER PRIMARY KEY,
+        Name TEXT);
+        
+    CREATE TABLE AuthorTextbookLink (
+        AuthorID INTEGER,
+        TextbookID INTEGER,
+        PRIMARY KEY (AuthorID, TextbookID)
+    );
+    
+    INSERT INTO Courses (CourseID, CourseName, Subject, GradeLevel, Current) VALUES
+    (1, 'Introduction to Psychology', 'Psychology', '9th Grade', 'Yes'),
+    (2, 'Organic Chemistry I', 'Chemistry', '10th Grade', 'Yes'),
+    (3, 'Calculus II', 'Mathematics', '11th Grade', 'Yes'),
+    (4, 'Principles of Economics', 'Economics', '9th Grade', 'Yes'),
+    (5, 'Introduction to Programming', 'Computer Science', '10th Grade', 'Yes'),
+    (6, 'World History', 'History', '9th Grade', 'Yes'),
+    (7, 'Molecular Biology', 'Biology', '10th Grade', 'Yes'),
+    (8, 'Digital Marketing Fundamentals', 'Marketing', '12th Grade', 'No'),
+    (9, 'Statistics for Business', 'Business', '12th Grade', 'Yes'),
+    (10, 'Environmental Science', 'Environmental Science', '9th Grade', 'Yes'),
+    (11, 'Literary Analysis', 'English', '9th Grade', 'Yes'),
+    (12, 'American Government', 'Political Science', '9th Grade', 'Yes'),
+    (13, 'Introduction to Philosophy', 'Philosophy', '10th Grade', 'Yes'),
+    (14, 'Linear Algebra', 'Mathematics', '12th Grade', 'Yes'),
+    (15, 'Social Psychology', 'Psychology', '10th Grade', 'Yes'),
+    (16, 'Organizational Behavior', 'Business', '12th Grade', 'Yes'),
+    (17, 'Microeconomics', 'Economics', '11th Grade', 'Yes'),
+    (18, 'Macroeconomics', 'Economics', '12th Grade', 'Yes'),
+    (19, 'Classical Mechanics', 'Physics', '12th Grade', 'No'),
+    (20, 'Modern Physics', 'Physics', '9th Grade', 'Yes'),
+    (21, 'Advanced Principles of Economics', 'Economics', '10th Grade', 'Yes'),
+    (22, 'Ceramics', 'Arts', 'NA', 'Yes'),
+    (23, 'Marching Band', 'Arts', 'NA', 'Yes'),
+    (24, 'Chorus', 'Arts', 'NA', 'Yes')
+    ;
+    
+    INSERT INTO Textbooks (TextbookID, Title, PublicationYear, CourseID) VALUES
+    (1, 'Psychology: An Introduction', 2018, 1),
+    (2, 'Organic Chemistry Simplified', 2019, 2),
+    (3, 'Calculus in Depth', 2017, 3),
+    (4, 'Economic Principles', 2018, 4),
+    (5, 'Learning Python', 2020, 5),
+    (6, 'A Journey Through History', 2016, 6),
+    (7, 'Understanding Genes', 2019, 7),
+    (8, 'Basics of Digital Marketing', 2021, 8),
+    (9, 'Business Statistics: An Applied Approach', 2017, 9),
+    (10, 'Principles of Environmental Science', 2015, 10),
+    (11, 'The Art of Literature', 2018, 11),
+    (12, 'The American Political System', 2020, 12),
+    (13, 'Philosophical Thoughts', 2016, 13),
+    (14, 'Matrix Theories', 2017, 14),
+    (15, 'Exploring Social Behaviors', 2021, 15),
+    (16, 'Behavior in Organizations', 2018, 16),
+    (17, 'The World of Microeconomics', 2019, 17),
+    (18, 'Global Economic Trends', 2020, 18),
+    (19, 'Foundations of Classical Mechanics', 2016, 19),
+    (20, 'Concepts of Modern Physics', 2021, 20),
+    (21, 'Advanced Economic Principles', 2018, 21)
+    ;
+    
+    INSERT INTO Author (AuthorID, Name) VALUES
+    (1, 'James Nguyen'),
+    (2, 'Jane Smith'),
+    (3, 'Alex Johnson'),
+    (4, 'Emily Turner'),
+    (5, 'Michael Brown'),
+    (6, 'Jessica Walters'),
+    (7, 'William Garcia'),
+    (8, 'Olivia Martinez'),
+    (9, 'Henry Lewis'),
+    (10, 'Sophia Jones'),
+    (11, 'Mason Lee'),
+    (12, 'Isabella Wilson'),
+    (13, 'Ethan Wong'),
+    (14, 'Ava Patel'),
+    (15, 'James Nguyen'),
+    (16, 'Charlotte Thompson'),
+    (17, 'Mia Kim'),
+    (18, 'Nemo Nobody'),
+    (19, 'Lucas Clark'),
+    (20, 'Amelia Hernandez'),
+    (21, 'Emily Turner'),
+    (22, 'James Nguyen')
+    ;
+    
+    INSERT INTO AuthorTextbookLink (AuthorID, TextbookID) VALUES
+    (1,1), -- James Nguyen associated with TextbookID 1
+    (1,22), -- James Nguyen associated with TextbookID 22
+    (2,2),
+    (3,3),
+    (4,4),
+    (5,5),
+    (6,6),
+    (7,7),
+    (8,8),
+    (9,9),
+    (10,10),
+    (11,11),
+    (12,12),
+    (13,13),
+    (14,14),
+    (15,15),
+    (16,16),
+    (17,17), -- Mia Kim associated with TextbookID 17
+    (17,18), -- Mia Kim associated with TextbookID 18
+    (19,19),
+    (20,20),
+    (21,21),
+    (22,22);
+
+---
+
+**Query #1**
+
+    SELECT * FROM courses LIMIT 3;
+
+| CourseID | CourseName                 | Subject     | GradeLevel | Current |
+| -------- | -------------------------- | ----------- | ---------- | ------- |
+| 1        | Introduction to Psychology | Psychology  | 9th Grade  | Yes     |
+| 2        | Organic Chemistry I        | Chemistry   | 10th Grade | Yes     |
+| 3        | Calculus II                | Mathematics | 11th Grade | Yes     |
+
+---
+**Query #2**
+
+    
+    SELECT * FROM Textbooks LIMIT 3;
+
+| TextbookID | Title                        | PublicationYear | CourseID |
+| ---------- | ---------------------------- | --------------- | -------- |
+| 1          | Psychology: An Introduction  | 2018            | 1        |
+| 2          | Organic Chemistry Simplified | 2019            | 2        |
+| 3          | Calculus in Depth            | 2017            | 3        |
+
+---
+**Query #3**
+
+    
+    SELECT * FROM Author LIMIT 3;
+
+| AuthorID | Name         |
+| -------- | ------------ |
+| 1        | James Nguyen |
+| 2        | Jane Smith   |
+| 3        | Alex Johnson |
+
+---
+**Query #4**
+
+    
+    SELECT * FROM AuthorTextbookLink LIMIT 3;
+
+| AuthorID | TextbookID |
+| -------- | ---------- |
+| 1        | 1          |
+| 1        | 22         |
+| 2        | 2          |
+
+---
+**Query #5**
+
+    
+    
+    SELECT CourseName
+    FROM Courses
+    WHERE Subject = 'Economics'
+    AND Current = 'Yes';
+
+| CourseName                       |
+| -------------------------------- |
+| Principles of Economics          |
+| Microeconomics                   |
+| Macroeconomics                   |
+| Advanced Principles of Economics |
+
+---
+**Query #6**
+
+    
+    
+    SELECT Courses.CourseName, Textbooks.Title
+    FROM Courses
+    INNER JOIN Textbooks
+    ON Courses.CourseID = Textbooks.CourseID
+    WHERE Courses.Subject = 'Economics'
+    AND Courses.Current = 'Yes'
+    ;
+
+| CourseName                       | Title                        |
+| -------------------------------- | ---------------------------- |
+| Principles of Economics          | Economic Principles          |
+| Microeconomics                   | The World of Microeconomics  |
+| Macroeconomics                   | Global Economic Trends       |
+| Advanced Principles of Economics | Advanced Economic Principles |
+
+---
+**Query #7**
+
+    
+    
+    SELECT Courses.coursename, Textbooks.Title, Author.Name
+    FROM Courses
+    
+    INNER JOIN Textbooks
+    ON Courses.CourseID = Textbooks.CourseID
+    
+    LEFT JOIN Authortextbooklink 
+    ON Textbooks.textbookID = Authortextbooklink.textbookID
+    
+    LEFT JOIN Author
+    ON Authortextbooklink.AuthorID = Author.AuthorID
+    
+    WHERE Courses.Subject = 'Economics'
+    AND Courses.Current = 'Yes'
+    ORDER BY Name
+    ;
+
+| CourseName                       | Title                        | Name         |
+| -------------------------------- | ---------------------------- | ------------ |
+| Principles of Economics          | Economic Principles          | Emily Turner |
+| Advanced Principles of Economics | Advanced Economic Principles | Emily Turner |
+| Microeconomics                   | The World of Microeconomics  | Mia Kim      |
+| Macroeconomics                   | Global Economic Trends       | Mia Kim      |
+
+---
+
+[View on DB Fiddle](https://www.db-fiddle.com/f/gcnfcTbLbWZfPvSKFHxQ9T/15)
