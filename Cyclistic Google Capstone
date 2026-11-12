@@ -1,0 +1,202 @@
+/*
+Cyclistic bike-share analysis: clean-data validation and rider behavior
+SQL dialect: SQLite
+Inputs: cyclistic_clean; cyclistic (final reconciliation only)
+
+Original queries are preserved in their supplied order. This read-only script
+checks data quality and compares member/casual behavior by duration, day,
+and start hour. It does not modify records or apply a daylight-saving fix.
+Results must be obtained from the original database; this annotated copy
+has not been rerun against that database.
+
+Analysis conventions:
+- Duration averages include only CAST(ride_length_minutes AS REAL) > 0.
+- Other queries retain all records unless a WHERE clause says otherwise.
+- Weekday filtering assumes 1=Sunday through 7=Saturday; confirm this against
+  the source field definition. It is not the numbering of SQLite strftime('%w').
+- Timestamp hours are used as stored; no time-zone conversion is applied.
+*/
+
+-- 1. Count rows retained in the clean table.
+-- The alias distinct_rides is a label, not a distinct-ID calculation.
+Select count(*) as distinct_rides
+FROM cyclistic_clean;
+
+-- 2. Check for repeated ride IDs after clean-table creation.
+-- In SQLite, SELECT * with GROUP BY returns one representative row per group;
+-- this identifies groups but does not display every duplicate row.
+SELECT * 
+FROM cyclistic_clean
+GROUP BY ride_ID
+HAVING COUNT(*) > 1;
+
+-- 3. Initial check for zero/negative durations using the stored column type.
+-- Later CAST-based checks make the intended numeric comparison explicit.
+SELECT COUNT(*)
+FROM cyclistic_clean
+WHERE ride_length_minutes <= 0;
+
+-- 4. Count NULL durations. Empty strings are examined separately below.
+SELECT COUNT(*)
+FROM cyclistic_clean
+WHERE ride_length_minutes IS NULL;
+
+-- 5. Inspect SQLite storage types used for the duration field.
+SELECT DISTINCT typeof(ride_length_minutes)
+FROM cyclistic_clean;
+
+-- 6. Count nonpositive durations after conversion to REAL.
+-- SQLite can cast blank/nonnumeric text to zero; this is not a standalone
+-- test that every duration contains valid numeric text. NULL stays NULL.
+SELECT COUNT(*)
+FROM cyclistic_clean
+WHERE CAST (ride_length_minutes AS REAL) <= 0;
+
+-- 7. Inspect timestamps for records flagged by the numeric duration check.
+SELECT ride_id, started_at, ended_at, ride_length_minutes
+FROM cyclistic_clean
+WHERE CAST (ride_length_minutes AS REAL) <= 0;
+
+-- 8. Explore a possible one-hour clock-change explanation for negative values.
+-- Adding 60 minutes is diagnostic only, not a verified correction.
+-- This SELECT neither updates stored values nor proves a daylight-saving cause.
+SELECT ride_id, ride_length_minutes,
+CAST(ride_length_minutes AS REAL) + 60 AS possible_corrected_minutes
+FROM cyclistic_clean
+WHERE CAST (ride_length_minutes AS REAL) < 0;
+
+-- 9. Inspect rider-category values, including any unexpected or NULL values.
+SELECT DISTINCT member_casual 
+FROM cyclistic_clean;
+
+-- 10. Inspect available day-of-week codes. DISTINCT and GROUP BY are
+-- redundant here but retained from the original exploratory query.
+SELECT DISTINCT day_of_week
+FROM cyclistic_clean
+GROUP BY day_of_week;
+
+-- 11. Compare mean positive ride duration by rider type and day code.
+-- Positive extreme durations are retained; this is a mean, not a median.
+SELECT member_casual, day_of_week, AVG(CAST(ride_length_minutes AS REAL)) AS average_ride_minutes
+FROM cyclistic_clean
+WHERE CAST(ride_length_minutes AS REAL) > 0
+GROUP BY member_casual, day_of_week
+ORDER BY day_of_week;
+
+-- 12. Count non-NULL ride_length values by rider type.
+-- COUNT(ride_length) equals total rows only if that field has no NULLs.
+SELECT member_casual, COUNT(ride_length)
+FROM cyclistic_clean
+GROUP BY member_casual;
+
+-- 13. Count all rows by rider type and day code, without duration exclusions.
+SELECT member_casual, day_of_week, COUNT(*)
+FROM cyclistic_clean
+GROUP BY member_casual, day_of_week;
+
+-- 14. Count rides by rider type and stored start hour across all days.
+-- strftime returns '00'-'23'; unreadable/NULL timestamps can form a NULL group.
+SELECT member_casual, strftime('%H', started_at) AS start_hour, COUNT(*)
+FROM cyclistic_clean
+GROUP BY member_casual, start_hour;
+
+-- 15. Compare start-hour patterns for weekday rides only, assuming the
+-- source coding is 1=Sunday, 2=Monday, ..., 7=Saturday.
+SELECT member_casual, strftime('%H', started_at) AS start_hour, COUNT(*)
+FROM cyclistic_clean
+WHERE CAST(day_of_week AS INT) IN (2,3,4,5,6)
+GROUP BY member_casual, start_hour;
+
+-- 16. Repeat rider/day counts with explicit numeric day ordering for reporting.
+SELECT member_casual, day_of_week, COUNT(*) AS ride_count
+FROM cyclistic_clean
+GROUP BY member_casual, day_of_week
+ORDER BY CAST(day_of_week AS INTEGER) ASC;
+
+-- 17. Inspect the five longest positive durations as potential outliers.
+-- Inspection alone does not exclude or validate these records.
+SELECT *
+FROM cyclistic_clean
+WHERE CAST(ride_length_minutes AS REAL) > 0
+ORDER BY CAST(ride_length_minutes AS REAL) DESC
+LIMIT 5;
+
+-- 18. Count non-NULL day codes, ordered by code rather than ride volume.
+SELECT day_of_week, COUNT(day_of_week)
+FROM cyclistic_clean
+GROUP BY day_of_week
+ORDER BY day_of_week DESC;
+
+-- 19. Rank day codes by non-NULL day-code counts, highest volume first.
+-- NULL day codes, if any, form a group with COUNT(day_of_week)=0.
+SELECT day_of_week, COUNT(day_of_week) AS total_count_per_day
+FROM cyclistic_clean
+GROUP BY day_of_week
+ORDER BY total_count_per_day DESC;
+
+-- 20. Rank rider-type/day combinations by non-NULL day-code counts.
+SELECT member_casual, day_of_week, COUNT(day_of_week) AS total_count_per_day
+FROM cyclistic_clean
+GROUP BY member_casual, day_of_week
+ORDER BY total_count_per_day DESC;
+
+-- 21. Quantify how many durations use each SQLite storage type.
+SELECT typeof(ride_length_minutes), COUNT(*)
+FROM cyclistic_clean
+GROUP BY typeof(ride_length_minutes);
+
+-- 22. Summarize missing, nonpositive, and positive durations.
+-- Missing is checked first so NULL/blank values receive that category.
+-- Other nonnumeric strings may cast to zero and enter Zero or negative;
+-- this CASE is not a comprehensive numeric-format validation.
+SELECT
+    CASE
+        WHEN ride_length_minutes IS NULL OR TRIM(ride_length_minutes) = '' THEN 'Missing'
+        WHEN CAST(ride_length_minutes AS REAL) <= 0 THEN 'Zero or negative'
+        ELSE 'Positive'
+    END AS duration_category,
+    COUNT(*) AS ride_count
+FROM cyclistic_clean
+GROUP BY duration_category;
+
+-- 23. Compare overall mean positive duration for members and casual riders.
+-- rides_included documents each mean's denominator; this may differ from
+-- counts elsewhere because nonpositive and NULL durations are excluded here.
+SELECT
+    member_casual,
+    AVG(CAST(ride_length_minutes AS REAL)) AS avg_minutes,
+    COUNT(*) AS rides_included
+FROM cyclistic_clean
+WHERE CAST(ride_length_minutes AS REAL) > 0
+GROUP BY member_casual;
+
+-- 24. Inspect frequencies of stored values that cast to nonpositive numbers.
+-- Grouping uses the stored value, while sorting uses its numeric conversion.
+SELECT
+    ride_length_minutes,
+    COUNT(*) AS ride_count
+FROM cyclistic_clean
+WHERE CAST(ride_length_minutes AS REAL) <= 0
+GROUP BY ride_length_minutes
+ORDER BY CAST(ride_length_minutes AS REAL);
+
+-- 25. Final check for repeated ride IDs or NULL IDs.
+-- Empty/whitespace-only IDs are checked separately in the following query.
+SELECT ride_id, COUNT(*) AS ride_count
+FROM cyclistic_clean
+GROUP BY ride_id
+HAVING COUNT(*) > 1 OR ride_id IS NULL;
+
+-- 26. Count empty or space-only ride IDs. NULL IDs do not satisfy this filter.
+SELECT COUNT(*) AS blank_ride_ids
+FROM cyclistic_clean
+WHERE TRIM(ride_id) = '';
+
+-- 27. Reconcile original and clean-table row counts in one result set.
+-- Their difference counts rows removed during clean-table creation; combine
+-- this with the ID checks before interpreting the clean count as unique rides.
+SELECT 'Original' AS table_name, COUNT(*) AS ride_count
+FROM cyclistic
+UNION ALL
+SELECT 'Clean', COUNT(*)
+FROM cyclistic_clean;
